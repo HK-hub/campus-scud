@@ -6,6 +6,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 /**
  *
  */
-public interface TbFinancialFlowService extends IService<FinancialFlow> {
+public interface FinancialFlowService extends IService<FinancialFlow> {
 
 }

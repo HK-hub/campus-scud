@@ -6,6 +6,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 /**
  *
  */
-public interface TbMessageService extends IService<TbMessage> {
+public interface MessageService extends IService<TbMessage> {
 
 }

@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 /**
  * @Entity com.aclab.campus_scud.pojo.TbFinancialFlow
  */
-public interface TbFinancialFlowMapper extends BaseMapper<FinancialFlow> {
+public interface FinancialFlowMapper extends BaseMapper<FinancialFlow> {
 
 }
 

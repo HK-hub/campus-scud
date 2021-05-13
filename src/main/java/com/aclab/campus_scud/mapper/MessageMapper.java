@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 /**
  * @Entity com.aclab.campus_scud.pojo.TbMessage
  */
-public interface TbMessageMapper extends BaseMapper<TbMessage> {
+public interface MessageMapper extends BaseMapper<TbMessage> {
 
 }
 
