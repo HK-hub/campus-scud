@@ -57,7 +57,7 @@ public class ResultInfo {
 	}
 
 	/**
-	 * 成功
+	 * 成功 : 不返回数据
 	 *
 	 * @return
 	 */
@@ -66,7 +66,7 @@ public class ResultInfo {
 	}
 
 	/**
-	 * 成功
+	 * 成功 : 返回数据: 响应码, 响应消息, 响应数据
 	 * @param data
 	 * @return
 	 */
@@ -79,7 +79,7 @@ public class ResultInfo {
 	}
 
 	/**
-	 * 失败
+	 * 失败:
 	 */
 	public static ResultInfo error(BaseErrorInfoInterface errorInfo) {
 		ResultInfo rb = new ResultInfo();
@@ -90,7 +90,7 @@ public class ResultInfo {
 	}
 
 	/**
-	 * 失败
+	 * 失败: 自定义响应码, 消息
 	 */
 	public static ResultInfo error(String code, String message) {
 		ResultInfo rb = new ResultInfo();
@@ -101,7 +101,7 @@ public class ResultInfo {
 	}
 
 	/**
-	 * 失败
+	 * 失败 : 自定义消息
 	 */
 	public static ResultInfo error(String message) {
 		ResultInfo rb = new ResultInfo();

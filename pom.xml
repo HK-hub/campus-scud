@@ -91,7 +91,6 @@
             <version>2.9.2</version>
         </dependency>
 
-
         <!--hutool具包-->
         <dependency>
             <groupId>cn.hutool</groupId>
@@ -143,6 +142,16 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+
+        <!--必须放在最后-->
+        <!-- https://mvnrepository.com/artifact/cn.amorou.uid/uid-generator-spring-boot-starter -->
+        <dependency>
+            <groupId>cn.amorou.uid</groupId>
+            <artifactId>uid-generator-spring-boot-starter</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
     </dependencies>
 
 

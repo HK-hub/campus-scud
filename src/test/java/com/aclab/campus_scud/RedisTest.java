@@ -1,5 +1,6 @@
 package com.aclab.campus_scud;
 
+import com.aclab.campus_scud.pojo.User;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -55,6 +56,20 @@ public class RedisTest {
 		String s =(String) this.redisTemplate.opsForHash().get("HASH_PERSON", "name");
 		log.info(s);
 
+		//操作对象: 从redis 中获取到的 数据是原数据的拷贝, 修改获取到的对象,不会修改redis 中的对象
+		User user = new User();
+		user.setNickname("你好");
+		user.setPhone("1781555494948");
+		redisTemplate.opsForValue().set("testUser",user);
+		User testUser = (User)redisTemplate.opsForValue().get("testUser");
+		log.info("user 用户: " + testUser.getNickname());
+		testUser.setNickname("意境");
+
+		log.info("修改用户后");
+		log.info("user 用户: " + testUser.getNickname());
+		System.out.println("redis 中对象: ");
+		User testUser2 = (User)redisTemplate.opsForValue().get("testUser");
+		log.info("user 用户2: " + testUser2.getNickname());
 
 	}
 

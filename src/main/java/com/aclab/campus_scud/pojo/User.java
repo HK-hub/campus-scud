@@ -51,8 +51,8 @@ public class User implements Serializable {
     /**
      * 
      */
-    @TableField(value = "tel")
-    private String tel;
+    @TableField(value = "phone")
+    private String phone;
 
     /**
      * 
@@ -74,6 +74,9 @@ public class User implements Serializable {
      */
     @TableField(value = "avatar_url")
     private String avatarUrl;
+
+    @TableField(value = "default_address")
+    private String defaultAddress ;
 
     /**
      * 

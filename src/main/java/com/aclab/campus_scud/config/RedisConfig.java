@@ -146,7 +146,7 @@ public class RedisConfig {
 						// 不缓存null
 						.disableCachingNullValues()
 						// 缓存数据保存1小时
-						.entryTtl(Duration.ofHours(1));
+						.entryTtl(Duration.ofHours(3));
 		RedisCacheManager redisCacheManager =
 				RedisCacheManager.RedisCacheManagerBuilder
 						// Redis 连接工厂

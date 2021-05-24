@@ -4,9 +4,10 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
-import lombok.Data;
 
 /**
  * 跑腿订单
@@ -92,7 +93,7 @@ public class Order implements Serializable {
     private Integer runnerId;
 
     /**
-     * 
+     * 1：发布 ， 0：接单， -1：结束
      */
     private Integer orderStatus;
 
@@ -173,33 +174,4 @@ public class Order implements Serializable {
         return result;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getClass().getSimpleName());
-        sb.append(" [");
-        sb.append("Hash = ").append(hashCode());
-        sb.append(", id=").append(id);
-        sb.append(", orderNumber=").append(orderNumber);
-        sb.append(", title=").append(title);
-        sb.append(", orderContent=").append(orderContent);
-        sb.append(", creator=").append(creator);
-        sb.append(", takeawayId=").append(takeawayId);
-        sb.append(", orderPhoto=").append(orderPhoto);
-        sb.append(", price=").append(price);
-        sb.append(", financialId=").append(financialId);
-        sb.append(", type=").append(type);
-        sb.append(", pickupLocation=").append(pickupLocation);
-        sb.append(", deliveryLocation=").append(deliveryLocation);
-        sb.append(", expectedDatetime=").append(expectedDatetime);
-        sb.append(", orderComment=").append(orderComment);
-        sb.append(", runnerId=").append(runnerId);
-        sb.append(", orderStatus=").append(orderStatus);
-        sb.append(", paymentStatus=").append(paymentStatus);
-        sb.append(", createTime=").append(createTime);
-        sb.append(", modifiedTime=").append(modifiedTime);
-        sb.append(", serialVersionUID=").append(serialVersionUID);
-        sb.append("]");
-        return sb.toString();
-    }
 }

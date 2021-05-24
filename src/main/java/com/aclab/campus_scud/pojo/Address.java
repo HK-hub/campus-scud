@@ -84,4 +84,21 @@ public class Address implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
+    /**
+     * @Title: 获取一个拼装地址
+     * @description:
+     * @author: 31618
+     * @date: 2021/5/24
+     * @param null:
+     * @return:
+     */
+    public String getAssemblyAddress(){
+
+        String address = ""+this.getProvince() +":"+this.getCity()+":"+this.getDetailAddress();
+        this.setSummaryAddress(address);
+        return address;
+    }
+
+
 }

@@ -18,6 +18,7 @@ import java.util.Date;
 @Data
 @ToString
 public class FinancialFlow implements Serializable {
+
     /**
      * 
      */

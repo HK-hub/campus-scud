@@ -1,7 +1,7 @@
 package com.aclab.campus_scud.controller;
-
 import cn.hutool.http.HttpStatus;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.aclab.campus_scud.excption.ResultInfo;
 import com.aclab.campus_scud.pojo.User;
 import com.aclab.campus_scud.pojo.WeChatUserInfo;
@@ -12,7 +12,9 @@ import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.UUID;
 
@@ -47,7 +49,7 @@ public class WeChatUserLoginController {
 			@ApiResponse(code = HttpStatus.HTTP_NOT_FOUND , message = "未知的服务资源")
 	})
 	@PostMapping("/wx/login")
-	public ResultInfo user_login(@RequestBody WeChatUserInfo weChatUserInfo) throws Exception {
+	public ResultInfo userLogin(@RequestBody WeChatUserInfo weChatUserInfo) throws Exception {
 
 		// 2.开发者服务器 登录凭证校验接口 appId + appSecret + 接收小程序发送的code
 		JSONObject sessionKeyOrOpenId = WeChatUtil.getSessionKeyOrOpenId(weChatUserInfo.getCode());
@@ -55,7 +57,14 @@ public class WeChatUserLoginController {
 		// 3.接收微信接口服务 获取返回的参数
 		String openid = sessionKeyOrOpenId.get("openid", String.class);
 		String sessionKey = sessionKeyOrOpenId.get("session_key", String.class);
+		// uuid生成唯一key，用于维护微信小程序用户与服务端的会话session_key, （或者生成Token）
+		String skey = UUID.randomUUID().toString();
 
+		System.out.println("--------------------openId: " + openid);
+		System.out.println("---------------------session_key: " + sessionKey);
+
+		//用户信息获取对象
+		JSONObject rawDataJson = JSONUtil.parseObj(weChatUserInfo.getRawData());
 		//解密后返回的用户信息
 		JSONObject userInfo = WeChatUtil.getUserInfo(weChatUserInfo.getEncrypteData(),
 				sessionKey, weChatUserInfo.getIv());
@@ -65,38 +74,29 @@ public class WeChatUserLoginController {
 		userQueryWrapper.lambda().eq(User::getOpenId, openid);
 		int userCount = userService.count(userQueryWrapper);
 
-		// uuid生成唯一key，用于维护微信小程序用户与服务端的会话session_key, （或者生成Token）
-		String skey = UUID.randomUUID().toString();
-
 		//业务逻辑操作: 新增用户还是更新用户
 		//用户为新用户
+
 		if (userCount <= 0) {
-			userService.insertWeChatUser(weChatUserInfo);
+			System.out.println("插入用户");
+			userService.insertWeChatUser(rawDataJson,openid, sessionKey, skey);
 
 		} else {
-			userService.updateWeChatUser(weChatUserInfo);
+			System.out.println("更新用户");
+			userService.updateWeChatUser(rawDataJson,openid, sessionKey, skey);
 		}
 
-		//将用户对象和 skey , session_key 存入Redis缓存中,
-		stringRedisTemplate.opsForValue().set("skey", skey);
-		stringRedisTemplate.opsForValue().set("session_key", sessionKey);
-		redisTemplate.opsForList().leftPush("weChatUserInfo", userInfo);
-
+		//将用户对象user和 skey , session_key 存入Redis缓存中,
+		User user = userService.getOne(new QueryWrapper<User>().lambda().eq(User::getOpenId, openid));
+		//构造不重复的多用户user , session_key , skey ,
+		redisTemplate.opsForValue().set("user:_|"+skey, user);
+		stringRedisTemplate.opsForValue().set("skey:_|"+skey, skey);
+		stringRedisTemplate.opsForValue().set("session_key:_|"+sessionKey, sessionKey);
+		redisTemplate.opsForList().leftPush("weChatUserInfo:_|"+openid, userInfo);
 
 		//6. 把新的skey返回给小程序 : 相应成功200, data: skey ,
 		return ResultInfo.success(skey);
 
 	}
-
-
-	@GetMapping("/wx/test")
-	public void test(@RequestParam("openId")String openId,
-	                 @RequestParam("nickName")String nickName,
-	                 @RequestParam("headUrl")String headUrl){
-		System.out.println("openId: " + openId);
-		System.out.println("nickName: "+nickName);
-		System.out.println("headUrl: "+headUrl);
-	}
-
 
 }
