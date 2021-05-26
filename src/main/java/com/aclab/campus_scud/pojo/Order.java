@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -15,6 +17,8 @@ import java.util.Date;
  */
 @TableName(value ="tb_order")
 @Data
+@ToString
+@EqualsAndHashCode
 public class Order implements Serializable {
     /**
      * 
@@ -115,63 +119,5 @@ public class Order implements Serializable {
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
-    @Override
-    public boolean equals(Object that) {
-        if (this == that) {
-            return true;
-        }
-        if (that == null) {
-            return false;
-        }
-        if (getClass() != that.getClass()) {
-            return false;
-        }
-        Order other = (Order) that;
-        return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
-            && (this.getOrderNumber() == null ? other.getOrderNumber() == null : this.getOrderNumber().equals(other.getOrderNumber()))
-            && (this.getTitle() == null ? other.getTitle() == null : this.getTitle().equals(other.getTitle()))
-            && (this.getOrderContent() == null ? other.getOrderContent() == null : this.getOrderContent().equals(other.getOrderContent()))
-            && (this.getCreator() == null ? other.getCreator() == null : this.getCreator().equals(other.getCreator()))
-            && (this.getTakeawayId() == null ? other.getTakeawayId() == null : this.getTakeawayId().equals(other.getTakeawayId()))
-            && (this.getOrderPhoto() == null ? other.getOrderPhoto() == null : this.getOrderPhoto().equals(other.getOrderPhoto()))
-            && (this.getPrice() == null ? other.getPrice() == null : this.getPrice().equals(other.getPrice()))
-            && (this.getFinancialId() == null ? other.getFinancialId() == null : this.getFinancialId().equals(other.getFinancialId()))
-            && (this.getType() == null ? other.getType() == null : this.getType().equals(other.getType()))
-            && (this.getPickupLocation() == null ? other.getPickupLocation() == null : this.getPickupLocation().equals(other.getPickupLocation()))
-            && (this.getDeliveryLocation() == null ? other.getDeliveryLocation() == null : this.getDeliveryLocation().equals(other.getDeliveryLocation()))
-            && (this.getExpectedDatetime() == null ? other.getExpectedDatetime() == null : this.getExpectedDatetime().equals(other.getExpectedDatetime()))
-            && (this.getOrderComment() == null ? other.getOrderComment() == null : this.getOrderComment().equals(other.getOrderComment()))
-            && (this.getRunnerId() == null ? other.getRunnerId() == null : this.getRunnerId().equals(other.getRunnerId()))
-            && (this.getOrderStatus() == null ? other.getOrderStatus() == null : this.getOrderStatus().equals(other.getOrderStatus()))
-            && (this.getPaymentStatus() == null ? other.getPaymentStatus() == null : this.getPaymentStatus().equals(other.getPaymentStatus()))
-            && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
-            && (this.getModifiedTime() == null ? other.getModifiedTime() == null : this.getModifiedTime().equals(other.getModifiedTime()));
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((getId() == null) ? 0 : getId().hashCode());
-        result = prime * result + ((getOrderNumber() == null) ? 0 : getOrderNumber().hashCode());
-        result = prime * result + ((getTitle() == null) ? 0 : getTitle().hashCode());
-        result = prime * result + ((getOrderContent() == null) ? 0 : getOrderContent().hashCode());
-        result = prime * result + ((getCreator() == null) ? 0 : getCreator().hashCode());
-        result = prime * result + ((getTakeawayId() == null) ? 0 : getTakeawayId().hashCode());
-        result = prime * result + ((getOrderPhoto() == null) ? 0 : getOrderPhoto().hashCode());
-        result = prime * result + ((getPrice() == null) ? 0 : getPrice().hashCode());
-        result = prime * result + ((getFinancialId() == null) ? 0 : getFinancialId().hashCode());
-        result = prime * result + ((getType() == null) ? 0 : getType().hashCode());
-        result = prime * result + ((getPickupLocation() == null) ? 0 : getPickupLocation().hashCode());
-        result = prime * result + ((getDeliveryLocation() == null) ? 0 : getDeliveryLocation().hashCode());
-        result = prime * result + ((getExpectedDatetime() == null) ? 0 : getExpectedDatetime().hashCode());
-        result = prime * result + ((getOrderComment() == null) ? 0 : getOrderComment().hashCode());
-        result = prime * result + ((getRunnerId() == null) ? 0 : getRunnerId().hashCode());
-        result = prime * result + ((getOrderStatus() == null) ? 0 : getOrderStatus().hashCode());
-        result = prime * result + ((getPaymentStatus() == null) ? 0 : getPaymentStatus().hashCode());
-        result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
-        result = prime * result + ((getModifiedTime() == null) ? 0 : getModifiedTime().hashCode());
-        return result;
-    }
 
 }

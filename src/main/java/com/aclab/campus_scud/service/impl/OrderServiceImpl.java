@@ -1,11 +1,14 @@
 package com.aclab.campus_scud.service.impl;
 
+import com.aclab.campus_scud.enums.OrderStatusEnum;
 import com.aclab.campus_scud.mapper.OrderMapper;
 import com.aclab.campus_scud.pojo.FinancialFlow;
 import com.aclab.campus_scud.pojo.Order;
 import com.aclab.campus_scud.pojo.User;
 import com.aclab.campus_scud.service.OrderService;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  *
@@ -24,7 +28,7 @@ implements OrderService{
 	@Autowired
 	private OrderMapper orderMapper;
 	@Autowired
-	private RedisTemplate redisTemplate;
+	private RedisTemplate<String, Object> redisTemplate;
 	@Autowired
 	private UserServiceImpl userService;
 	@Autowired
@@ -98,8 +102,68 @@ implements OrderService{
 			orderMapper.insert(newOrder);
 
 		}
+		//将订单放入Redis 中
+		redisTemplate.opsForList().leftPush("orders", newOrder);
+
 		return newOrder;
 	}
+
+	@Override
+	public List<Order> getAllOrderBySort() {
+
+		final List redisOrders = redisTemplate.opsForList().range("orders", 0, redisTemplate.opsForList().size("orders"));
+		if (redisOrders == null){
+			//redis 数据库中没有
+			final List<Order> orderList = orderMapper.selectList(new QueryWrapper<Order>().lambda().eq(Order::getOrderStatus, 1)
+					.or().eq(Order::getOrderStatus, 0)
+					.orderByDesc(Order::getCreateTime, Order::getModifiedTime, Order::getPrice, Order::getExpectedDatetime)
+			);
+			if (orderList!=null){
+				//加入Redis 中
+				redisTemplate.opsForList().rightPushAll("orders", orderList);
+			}
+			//返回经过排序:创建时间, 修改时间, 价格, 期望时间, 后的订单列表
+			return orderList;
+		}
+
+		return redisOrders;
+	}
+
+	@Transactional
+	@Override
+	public Order updateOrder(Order optOrder) {
+
+		//设置更新内容
+		optOrder.setModifiedTime(new Date());
+
+		final int state = orderMapper.update(optOrder, new UpdateWrapper<Order>().lambda()
+				.eq(Order::getOrderNumber, optOrder.getOrderNumber()));
+
+		//返回的是匹配的记录数， 而不是影响的记录数
+		//开启了事务，不用太担心无法更新， 更新后无需再次获取数据库的Order 订单
+		if (state > 0){
+			return optOrder;
+		}
+		return null;
+	}
+
+	/**
+	 * @Title: 撤销一个订单
+	 * @description: 撤销订单，用户主动撤销
+	 * @author: 31618
+	 * @date: 2021/5/25
+	 * @param : Stirng oId
+	 * @return:
+	 */
+	@Override
+	public int cancelOrder(String oId) {
+
+		return orderMapper.update(null, new UpdateWrapper<Order>().lambda()
+				.eq(Order::getOrderNumber, oId)
+				.set(Order::getOrderStatus, OrderStatusEnum.ORDER_REVOKED.getCode()));
+	}
+
+
 }
 
 

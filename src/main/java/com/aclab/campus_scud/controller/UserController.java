@@ -1,14 +1,16 @@
 package com.aclab.campus_scud.controller;
 
+import com.aclab.campus_scud.excption.CommonEnum;
 import com.aclab.campus_scud.excption.ResultInfo;
 import com.aclab.campus_scud.pojo.User;
 import com.aclab.campus_scud.service.impl.UserServiceImpl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import io.swagger.annotations.Api;
+import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,7 +29,9 @@ public class UserController {
 	@Autowired
 	private UserServiceImpl userService ;
 	@Autowired
-	private RedisTemplate redisTemplate;
+	private RedisTemplate<String, Object> redisTemplate;
+	@Autowired
+	protected StringRedisTemplate stringRedisTemplate;
 
 	@GetMapping("/wx/updatePhone")
 	@ResponseBody
@@ -70,6 +74,54 @@ public class UserController {
 		}
 	}
 
+
+
+	/**
+	 * @Title: 用户退出登录
+	 * @description: 微信小程序销毁，销毁Redis 中的数据
+	 * @author: 31618
+	 * @date: 2021/5/25
+	 * @param :
+	 * @return:
+	 */
+	@ApiOperation("用户退出登录")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "skey", value = "用户登录校验码",required = true),
+			@ApiImplicitParam(name = "session_key",value = "数字签名校验码",required = true)
+	})
+	@ApiResponses({
+			@ApiResponse(code = 200,message = "退出成功"),
+			@ApiResponse(code = 202,message = "未登录")
+	})
+	@GetMapping("/wx/logout")
+	public ResultInfo signOut(@RequestParam("skey")String skey,
+	                          @RequestParam("sessionKey")String sessionKey){
+
+		final String redisSkey = stringRedisTemplate.opsForValue().get("skey:_|" + skey);
+		//用户登录了
+		if (skey.equals(redisSkey)){
+
+			//校验数字签名
+			final String redisSessionKey = stringRedisTemplate.opsForValue().get("session_Key:_|" + sessionKey);
+
+			//数字签名校验通过
+			if (redisSessionKey != null){
+				//
+				final int out = userService.userSignOut(skey, sessionKey);
+				if (out == 0){
+					return ResultInfo.error(CommonEnum.SERVER_BUSY);
+				}
+				return ResultInfo.success("注销成功");
+
+			}else{
+				//数字签名校验未通过
+				return ResultInfo.error(CommonEnum.SIGNATURE_NOT_MATCH);
+			}
+
+		}
+
+		return ResultInfo.error(CommonEnum.USER_NOT_LOGIN);
+	}
 
 
 }

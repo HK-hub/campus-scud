@@ -1,6 +1,7 @@
 package com.aclab.campus_scud.service.impl;
 
 import cn.hutool.json.JSONObject;
+import com.aclab.campus_scud.enums.UserStatusEnum;
 import com.aclab.campus_scud.mapper.AddressMapper;
 import com.aclab.campus_scud.mapper.UserMapper;
 import com.aclab.campus_scud.pojo.Address;
@@ -11,6 +12,8 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import groovy.util.logging.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -25,14 +28,13 @@ import static cn.hutool.core.lang.Console.log;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements UserService{
 
 	@Autowired
-	UserMapper userMapper ;
+	private UserMapper userMapper ;
 	@Autowired
-	AddressMapper addressMapper ;
-
-
-	public void test(){
-
-	}
+	private AddressMapper addressMapper ;
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
+	@Autowired
+	private RedisTemplate<String, Object> redisTemplate;
 
 	/**
 	 * @Title: 更新用户登录
@@ -89,6 +91,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
 		return userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getOpenId, openId));
 	}
 
+	/**
+	 * @Title: 新增用户
+	 * @description:
+	 * @author: 31618
+	 * @date: 2021/5/25
+	 * @param : rawData , skey , session_key
+	 * @return:
+	 */
 	@Override
 	public User insertWeChatUser(JSONObject rawDataJson, String openId, String sessionKey, String skey) {
 
@@ -147,6 +157,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
 		return newUser;
 	}
 
+	/**
+	 * @Title: 获取一个用户
+	 * @description:
+	 * @author: 31618
+	 * @date: 2021/5/25
+	 * @param : skey
+	 * @return:
+	 */
 	@Override
 	public User getUserBySkey(String skey) {
 
@@ -164,6 +182,61 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>  implements U
 		return userMapper.selectOne(new QueryWrapper<User>().lambda().eq(User::getToken, token));
 
 	}
+
+	/**
+	 * @Title: 获取用户状态
+	 * @description: 通过skey 获取用户状态
+	 * @author: 31618
+	 * @date: 2021/5/25
+	 * @param :skey
+	 * @return:
+	 */
+	@Override
+	public UserStatusEnum getUserLoginStatus(String skey) {
+
+		//获取Redis 中的 skey
+		final String redisSkey = stringRedisTemplate.opsForValue().get("skey:_|" + skey);
+		//多重验证
+
+		//skey 为空， 用户未登录
+		if (redisSkey == null){
+			return UserStatusEnum.USER_UNLOGGED_IN;
+		}
+		return UserStatusEnum.USER_LOGGED_IN;
+	}
+
+	@Override
+	public UserStatusEnum getUserSignatureStatus(String sessionKey) {
+
+		final String redisSessionKey = stringRedisTemplate.opsForValue().get("session_key:_|" + sessionKey);
+
+		//数字签名不匹配
+		if (sessionKey == null){
+			return UserStatusEnum.USER_SIGNATURE_ERROR;
+		}
+		return UserStatusEnum.USER_IDENTITY_LEGAL;
+	}
+
+	@Override
+	public int userSignOut(String skey, String sessionKey) {
+
+		//清除地址,skey ,sessionKey, user, userInfo
+		try {
+			redisTemplate.delete("user:_|"+skey);
+			stringRedisTemplate.delete("skey:_|"+skey);
+			stringRedisTemplate.delete("session_key:_|"+sessionKey);
+			redisTemplate.opsForList().leftPop("weChatUserInfo:_|"+skey);
+			stringRedisTemplate.delete("defaultAddress:_|"+skey);
+			//
+		}catch (Exception e){
+
+			return 0;
+		}
+
+		return 1;
+	}
+
+
 }
 
 

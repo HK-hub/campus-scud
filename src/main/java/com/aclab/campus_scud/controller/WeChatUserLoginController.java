@@ -60,7 +60,7 @@ public class WeChatUserLoginController {
 		// uuid生成唯一key，用于维护微信小程序用户与服务端的会话session_key, （或者生成Token）
 		String skey = UUID.randomUUID().toString();
 
-		System.out.println("--------------------openId: " + openid);
+		System.out.println("---------------------openId: " + openid);
 		System.out.println("---------------------session_key: " + sessionKey);
 
 		//用户信息获取对象
@@ -92,7 +92,7 @@ public class WeChatUserLoginController {
 		redisTemplate.opsForValue().set("user:_|"+skey, user);
 		stringRedisTemplate.opsForValue().set("skey:_|"+skey, skey);
 		stringRedisTemplate.opsForValue().set("session_key:_|"+sessionKey, sessionKey);
-		redisTemplate.opsForList().leftPush("weChatUserInfo:_|"+openid, userInfo);
+		redisTemplate.opsForList().leftPush("weChatUserInfo:_|"+skey, userInfo);
 
 		//6. 把新的skey返回给小程序 : 相应成功200, data: skey ,
 		return ResultInfo.success(skey);
